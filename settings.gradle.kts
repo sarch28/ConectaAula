@@ -24,4 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "ConectaAula"
 include(":app")
- 
+include(":tv")
