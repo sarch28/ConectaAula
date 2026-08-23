@@ -12,9 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Button
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -22,6 +26,10 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.example.conectaaula.tv.ui.theme.ConectaAulaTheme
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class MainActivity : ComponentActivity() {
 
@@ -46,6 +54,87 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ConectaAulaTvScreen() {
 
+    var pregunta by remember {
+        mutableStateOf("Esperando pregunta desde el móvil...")
+    }
+
+    var opcionA by remember {
+        mutableStateOf("")
+    }
+
+    var opcionB by remember {
+        mutableStateOf("")
+    }
+
+    var opcionC by remember {
+        mutableStateOf("")
+    }
+
+    var opcionD by remember {
+        mutableStateOf("")
+    }
+
+    var respuestaSeleccionada by remember {
+        mutableStateOf("")
+    }
+
+    val database = remember {
+        FirebaseDatabase
+            .getInstance(
+                "https://conectaaula-dc7bc-default-rtdb.firebaseio.com"
+            )
+            .getReference("quiz")
+    }
+
+    DisposableEffect(database) {
+
+        val listener = object : ValueEventListener {
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                pregunta =
+                    snapshot.child("pregunta")
+                        .getValue(String::class.java)
+                        ?: "Esperando pregunta desde el móvil..."
+
+                opcionA =
+                    snapshot.child("opcionA")
+                        .getValue(String::class.java)
+                        ?: ""
+
+                opcionB =
+                    snapshot.child("opcionB")
+                        .getValue(String::class.java)
+                        ?: ""
+
+                opcionC =
+                    snapshot.child("opcionC")
+                        .getValue(String::class.java)
+                        ?: ""
+
+                opcionD =
+                    snapshot.child("opcionD")
+                        .getValue(String::class.java)
+                        ?: ""
+
+                respuestaSeleccionada =
+                    snapshot.child("respuesta")
+                        .getValue(String::class.java)
+                        ?: ""
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                pregunta = "Error al recibir la pregunta"
+            }
+        }
+
+        database.addValueEventListener(listener)
+
+        onDispose {
+            database.removeEventListener(listener)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -58,69 +147,112 @@ fun ConectaAulaTvScreen() {
             style = MaterialTheme.typography.displayMedium
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
         Text(
             text = "Pregunta recibida desde el dispositivo móvil",
             style = MaterialTheme.typography.bodyLarge
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(
+            modifier = Modifier.height(40.dp)
+        )
 
         Text(
-            text = "¿Cuál es la capital de México?",
+            text = pregunta,
             style = MaterialTheme.typography.headlineLarge
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(
+            modifier = Modifier.height(32.dp)
+        )
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(24.dp)
         ) {
 
             Button(
-                onClick = {},
+                onClick = {
+                    database
+                        .child("respuesta")
+                        .setValue("A")
+
+                    respuestaSeleccionada = "A"
+                },
                 modifier = Modifier.width(320.dp)
             ) {
-                Text(text = "A. Guadalajara")
+                Text(
+                    text = "A. $opcionA"
+                )
             }
 
             Button(
-                onClick = {},
+                onClick = {
+                    database
+                        .child("respuesta")
+                        .setValue("B")
+
+                    respuestaSeleccionada = "B"
+                },
                 modifier = Modifier.width(320.dp)
             ) {
-                Text(text = "B. Ciudad de México")
+                Text(
+                    text = "B. $opcionB"
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(
+            modifier = Modifier.height(24.dp)
+        )
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(24.dp)
         ) {
 
             Button(
-                onClick = {},
+                onClick = {
+                    database
+                        .child("respuesta")
+                        .setValue("C")
+
+                    respuestaSeleccionada = "C"
+                },
                 modifier = Modifier.width(320.dp)
             ) {
-                Text(text = "C. Monterrey")
+                Text(
+                    text = "C. $opcionC"
+                )
             }
 
             Button(
-                onClick = {},
+                onClick = {
+                    database
+                        .child("respuesta")
+                        .setValue("D")
+
+                    respuestaSeleccionada = "D"
+                },
                 modifier = Modifier.width(320.dp)
             ) {
-                Text(text = "D. Puebla")
+                Text(
+                    text = "D. $opcionD"
+                )
             }
         }
-    }
-}
 
-@OptIn(ExperimentalTvMaterial3Api::class)
-@Preview(showBackground = true)
-@Composable
-fun ConectaAulaTvPreview() {
-    ConectaAulaTheme {
-        ConectaAulaTvScreen()
+        if (respuestaSeleccionada.isNotEmpty()) {
+
+            Spacer(
+                modifier = Modifier.height(32.dp)
+            )
+
+            Text(
+                text = "Respuesta seleccionada: $respuestaSeleccionada",
+                style = MaterialTheme.typography.titleLarge
+            )
+        }
     }
 }
