@@ -31,6 +31,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +48,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
 
         setContent {
@@ -133,6 +135,7 @@ fun ConectaAulaScreen(
 
             override fun onCancelled(error: DatabaseError) {
                 respuestaTv = ""
+                respuestaCorrectaFirebase = ""
             }
         }
 
@@ -160,7 +163,7 @@ fun ConectaAulaScreen(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
 
-        // ENCABEZADO
+        // Encabezado
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
@@ -191,7 +194,7 @@ fun ConectaAulaScreen(
             }
         }
 
-        // FORMULARIO
+        // Tarjeta del formulario
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
@@ -208,12 +211,57 @@ fun ConectaAulaScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
 
-                Text(
-                    text = "Crear pregunta",
-                    fontSize = 19.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF334E78)
-                )
+                // Título + botón Limpiar
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+
+                    Text(
+                        text = "Crear pregunta",
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF334E78),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    OutlinedButton(
+                        onClick = {
+
+                            database
+                                .removeValue()
+                                .addOnSuccessListener {
+
+                                    pregunta = ""
+                                    opcionA = ""
+                                    opcionB = ""
+                                    opcionC = ""
+                                    opcionD = ""
+
+                                    respuestaCorrecta = ""
+                                    respuestaCorrectaFirebase = ""
+                                    respuestaTv = ""
+
+                                    mensaje = "Actividad limpiada"
+                                }
+                                .addOnFailureListener {
+
+                                    mensaje =
+                                        "No se pudo limpiar la actividad"
+                                }
+                        },
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+
+                        Text(
+                            text = "Limpiar",
+                            color = Color(0xFF4568A6),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
 
                 Text(
                     text = "Escribe la pregunta, las opciones y marca la respuesta correcta.",
@@ -302,7 +350,12 @@ fun ConectaAulaScreen(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
 
-                    listOf("A", "B", "C", "D").forEach { opcion ->
+                    listOf(
+                        "A",
+                        "B",
+                        "C",
+                        "D"
+                    ).forEach { opcion ->
 
                         if (respuestaCorrecta == opcion) {
 
@@ -333,6 +386,7 @@ fun ConectaAulaScreen(
                     }
                 }
 
+                // Enviar pregunta
                 Button(
                     onClick = {
 
@@ -344,9 +398,12 @@ fun ConectaAulaScreen(
                             opcionD.isBlank()
                         ) {
 
-                            mensaje = "Completa todos los campos"
+                            mensaje =
+                                "Completa todos los campos"
 
-                        } else if (respuestaCorrecta.isBlank()) {
+                        } else if (
+                            respuestaCorrecta.isBlank()
+                        ) {
 
                             mensaje =
                                 "Selecciona la respuesta correcta"
@@ -408,81 +465,81 @@ fun ConectaAulaScreen(
             }
         }
 
-        // RESPUESTA DE LA TV
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor =
-                    if (
-                        !resultadoDisponible || esCorrecta
-                    ) {
-                        Color(0xFFE4F5EA)
-                    } else {
-                        Color(0xFFFDE8E8)
-                    }
-            ),
-            shape = RoundedCornerShape(16.dp)
-        ) {
+        // Respuesta recibida desde la TV
+        if (respuestaCorrectaFirebase.isNotEmpty()) {
 
-            Column(
-                modifier = Modifier.padding(
-                    horizontal = 14.dp,
-                    vertical = 12.dp
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor =
+                        if (!resultadoDisponible || esCorrecta) {
+                            Color(0xFFE4F5EA)
+                        } else {
+                            Color(0xFFFDE8E8)
+                        }
                 ),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                shape = RoundedCornerShape(16.dp)
             ) {
 
-                Text(
-                    text = "Respuesta de la TV",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color =
-                        if (
-                            !resultadoDisponible || esCorrecta
-                        ) {
-                            Color(0xFF276749)
-                        } else {
-                            Color(0xFFB3261E)
-                        }
-                )
-
-                if (respuestaTv.isEmpty()) {
+                Column(
+                    modifier = Modifier.padding(
+                        horizontal = 14.dp,
+                        vertical = 12.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
 
                     Text(
-                        text = "Esperando respuesta...",
-                        fontSize = 13.sp,
-                        color = Color(0xFF4F6F5D)
-                    )
-
-                } else if (esCorrecta) {
-
-                    Text(
-                        text = "✓ Respuesta correcta",
-                        fontSize = 18.sp,
+                        text = "Respuesta de la TV",
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF238636)
+                        color =
+                            if (!resultadoDisponible || esCorrecta) {
+                                Color(0xFF276749)
+                            } else {
+                                Color(0xFFB3261E)
+                            }
                     )
 
-                    Text(
-                        text = "Opción seleccionada: $respuestaTv",
-                        fontSize = 14.sp,
-                        color = Color(0xFF276749)
-                    )
+                    if (respuestaTv.isEmpty()) {
 
-                } else {
+                        Text(
+                            text = "Esperando respuesta...",
+                            fontSize = 13.sp,
+                            color = Color(0xFF4F6F5D)
+                        )
 
-                    Text(
-                        text = "✗ Respuesta incorrecta",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFB3261E)
-                    )
+                    } else if (esCorrecta) {
 
-                    Text(
-                        text = "Seleccionada: $respuestaTv   •   Correcta: $respuestaCorrectaFirebase",
-                        fontSize = 14.sp,
-                        color = Color(0xFF8C1D18)
-                    )
+                        Text(
+                            text = "✓ Respuesta correcta",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF238636)
+                        )
+
+                        Text(
+                            text = "Opción seleccionada: $respuestaTv",
+                            fontSize = 14.sp,
+                            color = Color(0xFF276749)
+                        )
+
+                    } else {
+
+                        Text(
+                            text = "✗ Respuesta incorrecta",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFB3261E)
+                        )
+
+                        Text(
+                            text =
+                                "Seleccionada: $respuestaTv   •   Correcta: $respuestaCorrectaFirebase",
+                            fontSize = 14.sp,
+                            color = Color(0xFF8C1D18)
+                        )
+                    }
                 }
             }
         }
@@ -498,6 +555,7 @@ fun ConectaAulaScreen(
 fun ConectaAulaPreview() {
 
     ConectaAulaTheme {
+
         Text(
             text = "ConectaAula",
             modifier = Modifier.padding(24.dp)
