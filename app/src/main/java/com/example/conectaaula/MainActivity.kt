@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -29,15 +30,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.conectaaula.ui.theme.ConectaAulaTheme
+import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         setContent {
             ConectaAulaTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    modifier = Modifier.fillMaxSize()
+                ) { innerPadding ->
+
                     ConectaAulaScreen(
                         modifier = Modifier.padding(innerPadding)
                     )
@@ -48,14 +54,41 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ConectaAulaScreen(modifier: Modifier = Modifier) {
+fun ConectaAulaScreen(
+    modifier: Modifier = Modifier
+) {
 
-    var pregunta by rememberSaveable { mutableStateOf("") }
-    var opcionA by rememberSaveable { mutableStateOf("") }
-    var opcionB by rememberSaveable { mutableStateOf("") }
-    var opcionC by rememberSaveable { mutableStateOf("") }
-    var opcionD by rememberSaveable { mutableStateOf("") }
-    var mensaje by rememberSaveable { mutableStateOf("") }
+    var pregunta by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var opcionA by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var opcionB by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var opcionC by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var opcionD by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var mensaje by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    val database = remember {
+        FirebaseDatabase
+            .getInstance(
+                "https://conectaaula-dc7bc-default-rtdb.firebaseio.com"
+            )
+            .getReference("quiz")
+    }
 
     Column(
         modifier = modifier
@@ -77,53 +110,113 @@ fun ConectaAulaScreen(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.bodyLarge
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
 
         OutlinedTextField(
             value = pregunta,
-            onValueChange = { pregunta = it },
-            label = { Text("Pregunta") },
+            onValueChange = {
+                pregunta = it
+            },
+            label = {
+                Text("Pregunta")
+            },
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = opcionA,
-            onValueChange = { opcionA = it },
-            label = { Text("Opción A") },
+            onValueChange = {
+                opcionA = it
+            },
+            label = {
+                Text("Opción A")
+            },
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = opcionB,
-            onValueChange = { opcionB = it },
-            label = { Text("Opción B") },
+            onValueChange = {
+                opcionB = it
+            },
+            label = {
+                Text("Opción B")
+            },
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = opcionC,
-            onValueChange = { opcionC = it },
-            label = { Text("Opción C") },
+            onValueChange = {
+                opcionC = it
+            },
+            label = {
+                Text("Opción C")
+            },
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = opcionD,
-            onValueChange = { opcionD = it },
-            label = { Text("Opción D") },
+            onValueChange = {
+                opcionD = it
+            },
+            label = {
+                Text("Opción D")
+            },
             modifier = Modifier.fillMaxWidth()
         )
 
         Button(
             onClick = {
-                mensaje = "Pregunta lista para enviar a la TV"
+
+                if (
+                    pregunta.isBlank() ||
+                    opcionA.isBlank() ||
+                    opcionB.isBlank() ||
+                    opcionC.isBlank() ||
+                    opcionD.isBlank()
+                ) {
+
+                    mensaje = "Completa todos los campos"
+
+                } else {
+
+                    val datosPregunta = mapOf(
+                        "pregunta" to pregunta,
+                        "opcionA" to opcionA,
+                        "opcionB" to opcionB,
+                        "opcionC" to opcionC,
+                        "opcionD" to opcionD,
+                        "respuesta" to ""
+                    )
+
+                    database
+                        .setValue(datosPregunta)
+                        .addOnSuccessListener {
+
+                            mensaje =
+                                "Pregunta enviada correctamente a la TV"
+                        }
+                        .addOnFailureListener {
+
+                            mensaje =
+                                "Error al enviar la pregunta"
+                        }
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Enviar a TV")
+
+            Text(
+                text = "Enviar a TV"
+            )
         }
 
         if (mensaje.isNotEmpty()) {
+
             Text(
                 text = mensaje,
                 color = MaterialTheme.colorScheme.primary,
@@ -136,7 +229,11 @@ fun ConectaAulaScreen(modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun ConectaAulaPreview() {
+
     ConectaAulaTheme {
-        ConectaAulaScreen()
+        Text(
+            text = "ConectaAula",
+            modifier = Modifier.padding(24.dp)
+        )
     }
 }

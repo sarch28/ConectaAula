@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "375725669254",
+    "project_id": "conectaaula-dc7bc",
+    "storage_bucket": "conectaaula-dc7bc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:375725669254:android:f9e0701d546cd2117d8a07",
+        "android_client_info": {
+          "package_name": "com.example.conectaaula"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBf7czAk-zSGHTtl9jnJOSFcGFBMiMowMk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
