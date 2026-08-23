@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Button
@@ -70,6 +71,10 @@ fun ConectaAulaTvScreen() {
         mutableStateOf("")
     }
 
+    var respuestaCorrecta by remember {
+        mutableStateOf("")
+    }
+
     var respuestaSeleccionada by remember {
         mutableStateOf("")
     }
@@ -113,6 +118,11 @@ fun ConectaAulaTvScreen() {
                         .getValue(String::class.java)
                         ?: ""
 
+                respuestaCorrecta =
+                    snapshot.child("respuestaCorrecta")
+                        .getValue(String::class.java)
+                        ?: ""
+
                 respuestaSeleccionada =
                     snapshot.child("respuesta")
                         .getValue(String::class.java)
@@ -130,6 +140,14 @@ fun ConectaAulaTvScreen() {
             database.removeEventListener(listener)
         }
     }
+
+    val resultadoDisponible =
+        respuestaSeleccionada.isNotEmpty() &&
+                respuestaCorrecta.isNotEmpty()
+
+    val esCorrecta =
+        resultadoDisponible &&
+                respuestaSeleccionada == respuestaCorrecta
 
     Column(
         modifier = Modifier
@@ -220,8 +238,6 @@ fun ConectaAulaTvScreen() {
                             database
                                 .child("respuesta")
                                 .setValue("A")
-
-                            respuestaSeleccionada = "A"
                         },
                         modifier = Modifier.weight(1f)
                     ) {
@@ -235,8 +251,6 @@ fun ConectaAulaTvScreen() {
                             database
                                 .child("respuesta")
                                 .setValue("B")
-
-                            respuestaSeleccionada = "B"
                         },
                         modifier = Modifier.weight(1f)
                     ) {
@@ -260,8 +274,6 @@ fun ConectaAulaTvScreen() {
                             database
                                 .child("respuesta")
                                 .setValue("C")
-
-                            respuestaSeleccionada = "C"
                         },
                         modifier = Modifier.weight(1f)
                     ) {
@@ -275,8 +287,6 @@ fun ConectaAulaTvScreen() {
                             database
                                 .child("respuesta")
                                 .setValue("D")
-
-                            respuestaSeleccionada = "D"
                         },
                         modifier = Modifier.weight(1f)
                     ) {
@@ -287,14 +297,19 @@ fun ConectaAulaTvScreen() {
                 }
             }
 
-            // Respuesta seleccionada
-            if (respuestaSeleccionada.isNotEmpty()) {
+            // Resultado
+            if (resultadoDisponible) {
 
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = Color(0xFF145234),
+                            color =
+                                if (esCorrecta) {
+                                    Color(0xFF145234)
+                                } else {
+                                    Color(0xFF5A2525)
+                                },
                             shape = RoundedCornerShape(16.dp)
                         )
                         .padding(
@@ -303,11 +318,44 @@ fun ConectaAulaTvScreen() {
                         )
                 ) {
 
-                    Text(
-                        text = "Respuesta seleccionada: Opción $respuestaSeleccionada",
-                        fontSize = 18.sp,
-                        color = Color(0xFFADF0BF)
-                    )
+                    if (esCorrecta) {
+
+                        Text(
+                            text = "✓ Respuesta correcta",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFADF0BF)
+                        )
+
+                        Spacer(
+                            modifier = Modifier.height(3.dp)
+                        )
+
+                        Text(
+                            text = "Opción seleccionada: $respuestaSeleccionada",
+                            fontSize = 16.sp,
+                            color = Color(0xFFADF0BF)
+                        )
+
+                    } else {
+
+                        Text(
+                            text = "✗ Respuesta incorrecta",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFFB4AB)
+                        )
+
+                        Spacer(
+                            modifier = Modifier.height(3.dp)
+                        )
+
+                        Text(
+                            text = "Seleccionada: $respuestaSeleccionada   •   Correcta: $respuestaCorrecta",
+                            fontSize = 16.sp,
+                            color = Color(0xFFFFDAD6)
+                        )
+                    }
                 }
             }
         }

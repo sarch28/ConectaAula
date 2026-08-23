@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +20,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -33,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.conectaaula.ui.theme.ConectaAulaTheme
@@ -88,11 +90,19 @@ fun ConectaAulaScreen(
         mutableStateOf("")
     }
 
-    var mensaje by rememberSaveable {
+    var respuestaCorrecta by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var respuestaCorrectaFirebase by rememberSaveable {
         mutableStateOf("")
     }
 
     var respuestaTv by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var mensaje by rememberSaveable {
         mutableStateOf("")
     }
 
@@ -114,6 +124,11 @@ fun ConectaAulaScreen(
                     snapshot.child("respuesta")
                         .getValue(String::class.java)
                         ?: ""
+
+                respuestaCorrectaFirebase =
+                    snapshot.child("respuestaCorrecta")
+                        .getValue(String::class.java)
+                        ?: ""
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -128,72 +143,81 @@ fun ConectaAulaScreen(
         }
     }
 
+    val resultadoDisponible =
+        respuestaTv.isNotEmpty() &&
+                respuestaCorrectaFirebase.isNotEmpty()
+
+    val esCorrecta =
+        resultadoDisponible &&
+                respuestaTv == respuestaCorrectaFirebase
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
             .background(Color(0xFFF5F8FC))
-            .padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
 
+        // ENCABEZADO
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = Color(0xFF4568A6)
             ),
-            shape = RoundedCornerShape(20.dp)
+            shape = RoundedCornerShape(18.dp)
         ) {
 
             Column(
-                modifier = Modifier.padding(22.dp)
+                modifier = Modifier.padding(
+                    horizontal = 18.dp,
+                    vertical = 14.dp
+                )
             ) {
 
                 Text(
                     text = "ConectaAula",
                     color = Color.White,
-                    fontSize = 28.sp,
+                    fontSize = 25.sp,
                     fontWeight = FontWeight.Bold
-                )
-
-                Spacer(
-                    modifier = Modifier.height(6.dp)
                 )
 
                 Text(
                     text = "Actividad interactiva para Smart TV",
                     color = Color(0xFFE6EEFF),
-                    fontSize = 15.sp
+                    fontSize = 13.sp
                 )
             }
         }
 
+        // FORMULARIO
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = Color.White
             ),
             elevation = CardDefaults.cardElevation(
-                defaultElevation = 4.dp
+                defaultElevation = 3.dp
             ),
             shape = RoundedCornerShape(18.dp)
         ) {
 
             Column(
-                modifier = Modifier.padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
 
                 Text(
                     text = "Crear pregunta",
-                    fontSize = 20.sp,
+                    fontSize = 19.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF334E78)
                 )
 
                 Text(
-                    text = "Escribe una pregunta y cuatro opciones para enviarlas a la televisión.",
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = "Escribe la pregunta, las opciones y marca la respuesta correcta.",
+                    fontSize = 12.sp,
                     color = Color(0xFF5F6B7A)
                 )
 
@@ -206,7 +230,8 @@ fun ConectaAulaScreen(
                         Text("Pregunta")
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true
                 )
 
                 OutlinedTextField(
@@ -218,7 +243,8 @@ fun ConectaAulaScreen(
                         Text("Opción A")
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true
                 )
 
                 OutlinedTextField(
@@ -230,7 +256,8 @@ fun ConectaAulaScreen(
                         Text("Opción B")
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true
                 )
 
                 OutlinedTextField(
@@ -242,7 +269,8 @@ fun ConectaAulaScreen(
                         Text("Opción C")
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true
                 )
 
                 OutlinedTextField(
@@ -254,12 +282,56 @@ fun ConectaAulaScreen(
                         Text("Opción D")
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true
                 )
 
                 Spacer(
-                    modifier = Modifier.height(4.dp)
+                    modifier = Modifier.height(2.dp)
                 )
+
+                Text(
+                    text = "Respuesta correcta",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF334E78)
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+
+                    listOf("A", "B", "C", "D").forEach { opcion ->
+
+                        if (respuestaCorrecta == opcion) {
+
+                            Button(
+                                onClick = {
+                                    respuestaCorrecta = opcion
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF2E7D32),
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Text(opcion)
+                            }
+
+                        } else {
+
+                            OutlinedButton(
+                                onClick = {
+                                    respuestaCorrecta = opcion
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(opcion)
+                            }
+                        }
+                    }
+                }
 
                 Button(
                     onClick = {
@@ -274,6 +346,11 @@ fun ConectaAulaScreen(
 
                             mensaje = "Completa todos los campos"
 
+                        } else if (respuestaCorrecta.isBlank()) {
+
+                            mensaje =
+                                "Selecciona la respuesta correcta"
+
                         } else {
 
                             val datosPregunta = mapOf(
@@ -282,6 +359,7 @@ fun ConectaAulaScreen(
                                 "opcionB" to opcionB,
                                 "opcionC" to opcionC,
                                 "opcionD" to opcionD,
+                                "respuestaCorrecta" to respuestaCorrecta,
                                 "respuesta" to ""
                             )
 
@@ -293,6 +371,9 @@ fun ConectaAulaScreen(
                                         "Pregunta enviada correctamente"
 
                                     respuestaTv = ""
+
+                                    respuestaCorrectaFirebase =
+                                        respuestaCorrecta
                                 }
                                 .addOnFailureListener {
 
@@ -306,7 +387,7 @@ fun ConectaAulaScreen(
                         containerColor = Color(0xFF4568A6),
                         contentColor = Color.White
                     ),
-                    shape = RoundedCornerShape(14.dp)
+                    shape = RoundedCornerShape(12.dp)
                 ) {
 
                     Text(
@@ -319,6 +400,7 @@ fun ConectaAulaScreen(
 
                     Text(
                         text = mensaje,
+                        fontSize = 13.sp,
                         color = Color(0xFF4568A6),
                         fontWeight = FontWeight.Medium
                     )
@@ -326,48 +408,99 @@ fun ConectaAulaScreen(
             }
         }
 
+        // RESPUESTA DE LA TV
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = Color(0xFFE4F5EA)
+                containerColor =
+                    if (
+                        !resultadoDisponible || esCorrecta
+                    ) {
+                        Color(0xFFE4F5EA)
+                    } else {
+                        Color(0xFFFDE8E8)
+                    }
             ),
-            shape = RoundedCornerShape(18.dp)
+            shape = RoundedCornerShape(16.dp)
         ) {
 
             Column(
-                modifier = Modifier.padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.padding(
+                    horizontal = 14.dp,
+                    vertical = 12.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
 
                 Text(
                     text = "Respuesta de la TV",
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF276749)
+                    color =
+                        if (
+                            !resultadoDisponible || esCorrecta
+                        ) {
+                            Color(0xFF276749)
+                        } else {
+                            Color(0xFFB3261E)
+                        }
                 )
 
                 if (respuestaTv.isEmpty()) {
 
                     Text(
-                        text = "Esperando una respuesta desde la Smart TV...",
-                        fontSize = 15.sp,
+                        text = "Esperando respuesta...",
+                        fontSize = 13.sp,
                         color = Color(0xFF4F6F5D)
+                    )
+
+                } else if (esCorrecta) {
+
+                    Text(
+                        text = "✓ Respuesta correcta",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF238636)
+                    )
+
+                    Text(
+                        text = "Opción seleccionada: $respuestaTv",
+                        fontSize = 14.sp,
+                        color = Color(0xFF276749)
                     )
 
                 } else {
 
                     Text(
-                        text = "Opción seleccionada: $respuestaTv",
+                        text = "✗ Respuesta incorrecta",
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF238636)
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFB3261E)
+                    )
+
+                    Text(
+                        text = "Seleccionada: $respuestaTv   •   Correcta: $respuestaCorrectaFirebase",
+                        fontSize = 14.sp,
+                        color = Color(0xFF8C1D18)
                     )
                 }
             }
         }
 
         Spacer(
-            modifier = Modifier.height(16.dp)
+            modifier = Modifier.height(6.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ConectaAulaPreview() {
+
+    ConectaAulaTheme {
+        Text(
+            text = "ConectaAula",
+            modifier = Modifier.padding(24.dp)
         )
     }
 }
