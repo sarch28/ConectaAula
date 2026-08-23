@@ -3,27 +3,29 @@ package com.example.conectaaula.tv
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Button
 import androidx.tv.material3.ExperimentalTvMaterial3Api
-import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.example.conectaaula.tv.ui.theme.ConectaAulaTheme
 import com.google.firebase.database.DataSnapshot
@@ -33,18 +35,12 @@ import com.google.firebase.database.ValueEventListener
 
 class MainActivity : ComponentActivity() {
 
-    @OptIn(ExperimentalTvMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             ConectaAulaTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    shape = RectangleShape
-                ) {
-                    ConectaAulaTvScreen()
-                }
+                ConectaAulaTvScreen()
             }
         }
     }
@@ -124,7 +120,7 @@ fun ConectaAulaTvScreen() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                pregunta = "Error al recibir la pregunta"
+                pregunta = "No se pudo recibir la pregunta"
             }
         }
 
@@ -138,121 +134,182 @@ fun ConectaAulaTvScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(60.dp),
-        verticalArrangement = Arrangement.Center
+            .background(Color(0xFF101622))
+            .padding(top = 80.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Text(
-            text = "ConectaAula TV",
-            style = MaterialTheme.typography.displayMedium
-        )
-
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
-
-        Text(
-            text = "Pregunta recibida desde el dispositivo móvil",
-            style = MaterialTheme.typography.bodyLarge
-        )
-
-        Spacer(
-            modifier = Modifier.height(40.dp)
-        )
-
-        Text(
-            text = pregunta,
-            style = MaterialTheme.typography.headlineLarge
-        )
-
-        Spacer(
-            modifier = Modifier.height(32.dp)
-        )
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
+        Column(
+            modifier = Modifier.fillMaxWidth(0.84f),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            Button(
-                onClick = {
-                    database
-                        .child("respuesta")
-                        .setValue("A")
-
-                    respuestaSeleccionada = "A"
-                },
-                modifier = Modifier.width(320.dp)
+            // Encabezado
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = Color(0xFF4E72B1),
+                        shape = RoundedCornerShape(18.dp)
+                    )
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 16.dp
+                    )
             ) {
+
                 Text(
-                    text = "A. $opcionA"
+                    text = "ConectaAula TV",
+                    fontSize = 30.sp,
+                    color = Color.White
+                )
+
+                Spacer(
+                    modifier = Modifier.height(4.dp)
+                )
+
+                Text(
+                    text = "Actividad recibida desde el dispositivo móvil",
+                    fontSize = 15.sp,
+                    color = Color(0xFFE7EEFF)
                 )
             }
 
-            Button(
-                onClick = {
-                    database
-                        .child("respuesta")
-                        .setValue("B")
-
-                    respuestaSeleccionada = "B"
-                },
-                modifier = Modifier.width(320.dp)
+            // Pregunta y opciones
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = Color(0xFF202632),
+                        shape = RoundedCornerShape(18.dp)
+                    )
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 18.dp
+                    )
             ) {
+
                 Text(
-                    text = "B. $opcionB"
+                    text = "Pregunta",
+                    fontSize = 16.sp,
+                    color = Color(0xFFA7BFF0)
                 )
-            }
-        }
 
-        Spacer(
-            modifier = Modifier.height(24.dp)
-        )
+                Spacer(
+                    modifier = Modifier.height(6.dp)
+                )
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-
-            Button(
-                onClick = {
-                    database
-                        .child("respuesta")
-                        .setValue("C")
-
-                    respuestaSeleccionada = "C"
-                },
-                modifier = Modifier.width(320.dp)
-            ) {
                 Text(
-                    text = "C. $opcionC"
+                    text = pregunta,
+                    fontSize = 28.sp,
+                    color = Color.White
                 )
+
+                Spacer(
+                    modifier = Modifier.height(16.dp)
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+
+                    Button(
+                        onClick = {
+                            database
+                                .child("respuesta")
+                                .setValue("A")
+
+                            respuestaSeleccionada = "A"
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "A. $opcionA"
+                        )
+                    }
+
+                    Button(
+                        onClick = {
+                            database
+                                .child("respuesta")
+                                .setValue("B")
+
+                            respuestaSeleccionada = "B"
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "B. $opcionB"
+                        )
+                    }
+                }
+
+                Spacer(
+                    modifier = Modifier.height(10.dp)
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+
+                    Button(
+                        onClick = {
+                            database
+                                .child("respuesta")
+                                .setValue("C")
+
+                            respuestaSeleccionada = "C"
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "C. $opcionC"
+                        )
+                    }
+
+                    Button(
+                        onClick = {
+                            database
+                                .child("respuesta")
+                                .setValue("D")
+
+                            respuestaSeleccionada = "D"
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "D. $opcionD"
+                        )
+                    }
+                }
             }
 
-            Button(
-                onClick = {
-                    database
-                        .child("respuesta")
-                        .setValue("D")
+            // Respuesta seleccionada
+            if (respuestaSeleccionada.isNotEmpty()) {
 
-                    respuestaSeleccionada = "D"
-                },
-                modifier = Modifier.width(320.dp)
-            ) {
-                Text(
-                    text = "D. $opcionD"
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            color = Color(0xFF145234),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .padding(
+                            horizontal = 18.dp,
+                            vertical = 12.dp
+                        )
+                ) {
+
+                    Text(
+                        text = "Respuesta seleccionada: Opción $respuestaSeleccionada",
+                        fontSize = 18.sp,
+                        color = Color(0xFFADF0BF)
+                    )
+                }
             }
-        }
-
-        if (respuestaSeleccionada.isNotEmpty()) {
-
-            Spacer(
-                modifier = Modifier.height(32.dp)
-            )
-
-            Text(
-                text = "Respuesta seleccionada: $respuestaSeleccionada",
-                style = MaterialTheme.typography.titleLarge
-            )
         }
     }
 }
