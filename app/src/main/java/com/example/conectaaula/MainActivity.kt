@@ -163,33 +163,33 @@ fun ConectaAulaScreen(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
 
-        // Encabezado
+        // Encabezado compacto
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = Color(0xFF4568A6)
             ),
-            shape = RoundedCornerShape(18.dp)
+            shape = RoundedCornerShape(16.dp)
         ) {
 
             Column(
                 modifier = Modifier.padding(
-                    horizontal = 18.dp,
-                    vertical = 14.dp
+                    horizontal = 16.dp,
+                    vertical = 8.dp
                 )
             ) {
 
                 Text(
                     text = "ConectaAula",
                     color = Color.White,
-                    fontSize = 25.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
 
                 Text(
                     text = "Actividad interactiva para Smart TV",
                     color = Color(0xFFE6EEFF),
-                    fontSize = 13.sp
+                    fontSize = 12.sp
                 )
             }
         }
@@ -386,7 +386,7 @@ fun ConectaAulaScreen(
                     }
                 }
 
-                // Enviar pregunta
+                // Botón enviar
                 Button(
                     onClick = {
 
